@@ -8,10 +8,6 @@ from peewee import *
 from datetime import datetime
 from playhouse.shortcuts import model_to_dict
 
-
-load_dotenv()
-app = Flask(__name__)
-
 mydb = MySQLDatabase(os.getenv("MYSQL_DATABASE"),
     user=os.getenv("MYSQL_USER"),
     host=os.getenv("MYSQL_HOST"),
@@ -19,6 +15,9 @@ mydb = MySQLDatabase(os.getenv("MYSQL_DATABASE"),
     port=3306
 )
 print(mydb)
+
+load_dotenv()
+app = Flask(__name__)
 
 class TimelinePost(Model):
     name = CharField()
@@ -31,7 +30,6 @@ class TimelinePost(Model):
 
 mydb.connect()
 mydb.create_tables([TimelinePost])
-
 
 data = 0
 filename = os.path.join(app.static_folder, 'data.json')
