@@ -7,17 +7,18 @@ from .gmail.gmail import send_email
 from peewee import *
 from datetime import datetime
 from playhouse.shortcuts import model_to_dict
-
-
-load_dotenv()
-app = Flask(__name__)
  
-mydb = MySQLDatabase(os.getenv("MYSQL_DATABASE"),
-    user=os.getenv("MYSQL_USER"),
-    host=os.getenv("MYSQL_HOST"),
-    password=os.getenv("MYSQL_PASSWORD"),
-    port=3306
-)
+if os.getenv("TESTING") == "true":
+    print("Running in test mode")
+    mydb = SqliteDatabase('file:memory?mode=memory&cache=shared', uri=True)
+else:
+    mydb = MySQLDatabase(os.getenv("MYSQL_DATABASE"),
+        user=os.getenv("MYSQL_USER"),
+        password=os.getenv("MYSQL_PASSWORD"),
+        host=os.getenv("MYSQL_HOST"),
+        port=3306
+    )
+
 print(mydb)
 
 class TimelinePost(Model):
@@ -32,6 +33,8 @@ class TimelinePost(Model):
 mydb.connect()
 mydb.create_tables([TimelinePost])
 
+load_dotenv()
+app = Flask(__name__)
 
 data = 0
 filename = os.path.join(app.static_folder, 'data.json')
@@ -72,11 +75,31 @@ def page_not_found(e):
 
 @app.route('/api/timeline_post', methods=['POST'])
 def post_time_line_post():
-    name = request.form['name']
-    email = request.form['email']
-    content = request.form['content']
-    timeline_post = TimelinePost.create(name=name, email=email, content=content)
+    # Validate name
+    try:
+        name = request.form['name']
+        if len(name) < 1:
+            return "Invalid content", 400
+    except KeyError as err:
+        return "Invalid name", 400
 
+    # Validate email
+    try:
+        email = request.form['email']
+        if "@" not in email:
+            return "Invalid email", 400
+    except KeyError as err:
+        return "Invalid email", 400
+
+    # Validate content
+    try:
+        content = request.form['content']
+        if len(content) < 1:
+            return "Invalid content", 400
+    except KeyError as err:
+        return "Invalid content", 400
+
+    timeline_post = TimelinePost.create(name=name, email=email, content=content)
     return model_to_dict(timeline_post)
 
 @app.route('/api/timeline_post', methods=['GET'])
