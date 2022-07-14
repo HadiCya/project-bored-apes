@@ -44,7 +44,7 @@ class AppTestCase(unittest.TestCase):
         assert first_post['email'] == "john@example.com"
         assert "content" in first_post
         assert first_post['content'] == "Hello world, I'm John!"
-        # Timeline page tests
+        # Timeline page
         timeline_response = self.client.get("timeline")
         assert timeline_response.status_code == 200
         html = timeline_response.get_data(as_text=True)
