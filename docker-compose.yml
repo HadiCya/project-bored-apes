@@ -1,0 +1,28 @@
+version: "3"
+services:
+  project-bored-apes:
+    container_name: project-bored-apes
+    build: .
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - FLASK_ENV=development
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/project-bored-apes
+    depends_on:
+      - mysql
+
+  mysql:
+    container_name: mysql
+    image: mariadb
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - mydatabase:/var/lib/mysql
+
+volumes:
+  mydatabase:
